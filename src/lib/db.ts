@@ -1,6 +1,8 @@
-import { sql } from "@vercel/postgres";
+import { Pool } from "pg";
 
-export { sql };
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL,
+});
 
 export interface Lead {
   id: string;
@@ -27,8 +29,8 @@ export interface LeadInput {
 }
 
 export async function createLead(lead: LeadInput): Promise<Lead> {
-  const result = await sql<Lead>`
-    INSERT INTO leads (
+  const result = await pool.query<Lead>(
+    `INSERT INTO leads (
       clinic_name,
       city,
       email,
@@ -37,18 +39,26 @@ export async function createLead(lead: LeadInput): Promise<Lead> {
       patient_volume,
       pain_point,
       conversation
-    ) VALUES (
-      ${lead.clinic_name || null},
-      ${lead.city || null},
-      ${lead.email || null},
-      ${lead.phone || null},
-      ${lead.has_website ?? null},
-      ${lead.patient_volume || null},
-      ${lead.pain_point || null},
-      ${JSON.stringify(lead.conversation)}
-    )
-    RETURNING *
-  `;
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    RETURNING *`,
+    [
+      lead.clinic_name || null,
+      lead.city || null,
+      lead.email || null,
+      lead.phone || null,
+      lead.has_website ?? null,
+      lead.patient_volume || null,
+      lead.pain_point || null,
+      JSON.stringify(lead.conversation),
+    ]
+  );
 
   return result.rows[0];
+}
+
+export async function getLeads(): Promise<Lead[]> {
+  const result = await pool.query<Lead>(
+    "SELECT * FROM leads ORDER BY created_at DESC"
+  );
+  return result.rows;
 }

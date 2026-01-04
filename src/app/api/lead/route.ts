@@ -16,10 +16,10 @@ export async function POST(request: NextRequest) {
   try {
     const body: LeadRequest = await request.json();
 
-    // Validate required fields - need at least email OR phone
-    if (!body.email && !body.phone) {
+    // Validate required fields - email is required, phone is optional
+    if (!body.email) {
       return NextResponse.json(
-        { error: "Email sau telefon este obligatoriu" },
+        { error: "Email este obligatoriu" },
         { status: 400 }
       );
     }

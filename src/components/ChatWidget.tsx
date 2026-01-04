@@ -119,8 +119,8 @@ export function ChatWidget() {
       ];
       setMessages(updatedMessages);
 
-      // If lead data was extracted, submit it
-      if (data.leadData && (data.leadData.email || data.leadData.phone)) {
+      // If lead data was extracted with email, submit it
+      if (data.leadData && data.leadData.email) {
         await submitLead(data.leadData, updatedMessages);
       }
     } catch (error) {

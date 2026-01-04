@@ -34,7 +34,7 @@ Spune ceva de genul:
 "Super! Ca să vă rezerv locul pe waitlist, am nevoie de:
 - Numele clinicii
 - Email
-- Telefon
+- Telefon (opțional)
 
 Vă contactăm când deschidem accesul. Clinicile de pe waitlist primesc 2 luni gratuite în loc de 14! 🎉"
 
