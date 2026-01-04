@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Rounded square background -->
+  <rect x="10" y="10" width="180" height="180" rx="36" fill="#E85D4C"/>
+
+  <!-- MessageCircle icon (Lucide style) -->
+  <path
+    d="M100 55C72.4 55 50 74.6 50 98.5C50 110.5 55.5 121.3 64.5 129L60 145L80.5 135.5C86.5 138 93.1 139.5 100 139.5C127.6 139.5 150 119.9 150 96C150 72.1 127.6 55 100 55Z"
+    stroke="white"
+    stroke-width="10"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>

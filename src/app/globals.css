@@ -1,26 +1,319 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Typography - Inter font */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Chato brand colors */
+  --color-coral: var(--coral);
+  --color-teal: var(--teal);
+  --color-warm-gray: var(--warm-gray);
+  --color-off-white: var(--off-white);
+  --color-social-proof-bg: var(--social-proof-bg);
+  --color-bot-message-bg: var(--bot-message-bg);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Border radius - Chato spec: 8px small, 16px buttons, 24px cards */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-4xl: 32px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  /* Chato Brand Colors */
+  --radius: 0.5rem;
+
+  /* Background: Off-white #FAFAFA */
+  --background: #FAFAFA;
+  /* Text: Near-black #1A1A1A */
+  --foreground: #1A1A1A;
+
+  /* Card: White #FFFFFF */
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A1A;
+
+  /* Primary: Coral #E85D4C */
+  --primary: #E85D4C;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary: Soft teal #2A9D8F */
+  --secondary: #2A9D8F;
+  --secondary-foreground: #FFFFFF;
+
+  /* Muted: Warm gray #6B7280 */
+  --muted: #F3F4F6;
+  --muted-foreground: #6B7280;
+
+  /* Accent: Same as secondary teal for icons/links */
+  --accent: #2A9D8F;
+  --accent-foreground: #FFFFFF;
+
+  --destructive: #DC2626;
+
+  /* Border: Light gray #E5E7EB */
+  --border: #E5E7EB;
+  --input: #E5E7EB;
+  --ring: #E85D4C;
+
+  /* Chart colors using brand palette */
+  --chart-1: #E85D4C;
+  --chart-2: #2A9D8F;
+  --chart-3: #6B7280;
+  --chart-4: #F59E0B;
+  --chart-5: #8B5CF6;
+
+  /* Sidebar */
+  --sidebar: #FAFAFA;
+  --sidebar-foreground: #1A1A1A;
+  --sidebar-primary: #E85D4C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F3F4F6;
+  --sidebar-accent-foreground: #1A1A1A;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #E85D4C;
+
+  /* Chato-specific custom properties */
+  --coral: #E85D4C;
+  --teal: #2A9D8F;
+  --warm-gray: #6B7280;
+  --off-white: #FAFAFA;
+  --social-proof-bg: #F9FAFB;
+  --bot-message-bg: #F3F4F6;
+}
+
+.dark {
+  /* Dark mode - Chato brand colors adapted */
+  --background: #1A1A1A;
+  --foreground: #FAFAFA;
+
+  --card: #262626;
+  --card-foreground: #FAFAFA;
+
+  --popover: #262626;
+  --popover-foreground: #FAFAFA;
+
+  /* Primary coral stays the same */
+  --primary: #E85D4C;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary teal - slightly lighter for dark mode */
+  --secondary: #3DB8A9;
+  --secondary-foreground: #1A1A1A;
+
+  --muted: #404040;
+  --muted-foreground: #A1A1AA;
+
+  --accent: #3DB8A9;
+  --accent-foreground: #1A1A1A;
+
+  --destructive: #EF4444;
+
+  --border: #404040;
+  --input: #404040;
+  --ring: #E85D4C;
+
+  --chart-1: #E85D4C;
+  --chart-2: #3DB8A9;
+  --chart-3: #A1A1AA;
+  --chart-4: #FBBF24;
+  --chart-5: #A78BFA;
+
+  --sidebar: #1A1A1A;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #E85D4C;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #404040;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: #404040;
+  --sidebar-ring: #E85D4C;
+
+  --coral: #E85D4C;
+  --teal: #3DB8A9;
+  --warm-gray: #A1A1AA;
+  --off-white: #1A1A1A;
+  --social-proof-bg: #262626;
+  --bot-message-bg: #404040;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button,
+  [role="button"] {
+    cursor: pointer;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Chato-specific utility styles */
+@layer components {
+  /* Primary CTA button - coral with shadow */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground font-semibold;
+    @apply rounded-xl px-6 py-3;
+    @apply transition-all duration-200;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-primary:hover {
+    @apply opacity-90;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Secondary button - white with coral border */
+  .btn-secondary {
+    @apply bg-white text-primary font-semibold;
+    @apply border-2 border-primary;
+    @apply rounded-xl px-6 py-3;
+    @apply transition-all duration-200;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-primary/5;
+  }
+
+  /* Card with hover shadow */
+  .card-hover {
+    @apply bg-card border border-border rounded-3xl;
+    @apply transition-all duration-200;
+  }
+
+  .card-hover:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Chat widget button */
+  .chat-widget-btn {
+    @apply w-15 h-15 rounded-full bg-primary text-white;
+    @apply flex items-center justify-center;
+    @apply fixed bottom-6 right-6;
+    @apply transition-transform duration-200;
+    box-shadow: 0 4px 16px rgba(232, 93, 76, 0.4);
+  }
+
+  .chat-widget-btn:hover {
+    @apply scale-105;
+  }
+
+  /* Chat widget pulse animation */
+  .chat-widget-pulse {
+    animation: pulse-coral 2s infinite;
+  }
+
+  /* User message bubble */
+  .message-user {
+    @apply bg-primary text-white rounded-2xl rounded-br-md px-4 py-2;
+  }
+
+  /* Bot message bubble */
+  .message-bot {
+    @apply bg-bot-message-bg text-foreground rounded-2xl rounded-bl-md px-4 py-2;
+  }
+
+  /* Social proof bar */
+  .social-proof-bar {
+    @apply bg-social-proof-bg py-4;
+  }
+
+  /* Section spacing */
+  .section-spacing {
+    @apply py-20 md:py-24 lg:py-28;
+  }
+
+  /* Container max-width */
+  .container-chato {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* Animations */
+@keyframes pulse-coral {
+  0%, 100% {
+    box-shadow: 0 4px 16px rgba(232, 93, 76, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 24px rgba(232, 93, 76, 0.6);
+  }
+}
+
+/* Typography utilities */
+@layer utilities {
+  /* Hero heading: 56-64px, font-weight 700 */
+  .text-hero {
+    @apply text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight;
+  }
+
+  /* Section headings: 36-40px, font-weight 600 */
+  .text-section {
+    @apply text-3xl sm:text-4xl font-semibold leading-tight;
+  }
+
+  /* Subheadings: 24px, font-weight 600 */
+  .text-subheading {
+    @apply text-xl sm:text-2xl font-semibold;
+  }
+
+  /* Body: 18px, font-weight 400 */
+  .text-body {
+    @apply text-base sm:text-lg;
+  }
+
+  /* Small/muted: 14px */
+  .text-small {
+    @apply text-sm text-muted-foreground;
+  }
+
+  /* Button text: 16px, font-weight 600 */
+  .text-button {
+    @apply text-base font-semibold;
+  }
 }
