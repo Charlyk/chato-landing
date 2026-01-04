@@ -8,12 +8,22 @@ import { MessageCircle, Send, X } from "lucide-react";
 import { useChat } from "./ChatContext";
 
 interface Message {
-  role: "user" | "bot";
+  role: "user" | "assistant";
   content: string;
 }
 
+interface LeadData {
+  clinic_name?: string;
+  city?: string;
+  email?: string;
+  phone?: string;
+  has_website?: boolean;
+  patient_volume?: string;
+  pain_point?: string;
+}
+
 const initialMessage: Message = {
-  role: "bot",
+  role: "assistant",
   content:
     "Bună! 👋 Sunt Chato, asistent AI pentru clinici stomatologice. Pot să răspund la orice întrebare despre cum funcționez.\n\nApropo, voi cum gestionați acum întrebările pacienților de pe site?",
 };
@@ -24,7 +34,8 @@ export function ChatWidget() {
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showBubble, setShowBubble] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Show floating bubble after 1 second
   useEffect(() => {
@@ -44,30 +55,87 @@ export function ChatWidget() {
   }, [isOpen]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
+
+  // Submit lead to database
+  const submitLead = async (leadData: LeadData, conversation: Message[]) => {
+    if (leadSubmitted) return; // Don't submit twice
+
+    try {
+      const response = await fetch("/api/lead", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...leadData,
+          conversation: conversation,
+        }),
+      });
+
+      if (response.ok) {
+        setLeadSubmitted(true);
+        console.log("Lead saved successfully");
+      } else {
+        console.error("Failed to save lead");
+      }
+    } catch (error) {
+      console.error("Error saving lead:", error);
     }
-  }, [messages]);
+  };
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || isTyping) return;
 
     const userMessage = input.trim();
     setInput("");
-    setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+
+    const newMessages: Message[] = [
+      ...messages,
+      { role: "user", content: userMessage },
+    ];
+    setMessages(newMessages);
     setIsTyping(true);
 
-    // Simulate bot response (in production, this would call /api/chat)
-    setTimeout(() => {
-      setIsTyping(false);
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Eroare la comunicare");
+      }
+
+      const updatedMessages: Message[] = [
+        ...newMessages,
+        { role: "assistant", content: data.response },
+      ];
+      setMessages(updatedMessages);
+
+      // If lead data was extracted, submit it
+      if (data.leadData && (data.leadData.email || data.leadData.phone)) {
+        await submitLead(data.leadData, updatedMessages);
+      }
+    } catch (error) {
+      console.error("Chat error:", error);
       setMessages((prev) => [
         ...prev,
         {
-          role: "bot",
-          content: getBotResponse(userMessage),
+          role: "assistant",
+          content:
+            "Scuze, am întâmpinat o problemă tehnică. Te rog încearcă din nou sau completează formularul de mai jos pentru a te înscrie pe waitlist.",
         },
       ]);
-    }, 1000 + Math.random() * 1000);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -91,7 +159,8 @@ export function ChatWidget() {
           </button>
           <button onClick={openChat} className="text-left">
             <p className="text-sm text-foreground">
-              Bună! 👋 Sunt Chato. Ai întrebări despre cum te pot ajuta cu clinica ta?
+              Bună! 👋 Sunt Chato. Ai întrebări despre cum te pot ajuta cu
+              clinica ta?
             </p>
           </button>
         </div>
@@ -149,8 +218,8 @@ export function ChatWidget() {
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 min-h-0">
+              <div className="space-y-4 p-4">
                 {messages.map((message, index) => (
                   <div
                     key={index}
@@ -158,7 +227,7 @@ export function ChatWidget() {
                       message.role === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
-                    {message.role === "bot" && (
+                    {message.role === "assistant" && (
                       <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center mr-2 shrink-0">
                         <MessageCircle className="w-4 h-4 text-white" />
                       </div>
@@ -195,6 +264,7 @@ export function ChatWidget() {
                     </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
 
@@ -224,27 +294,4 @@ export function ChatWidget() {
       )}
     </>
   );
-}
-
-// Simple demo responses
-function getBotResponse(message: string): string {
-  const lowerMessage = message.toLowerCase();
-
-  if (lowerMessage.includes("pret") || lowerMessage.includes("cost")) {
-    return "Planul Start e 150 RON/lună pentru 500 conversații. Ajunge pentru majoritatea clinicilor mici-medii. Câți pacienți vă contactează pe site aproximativ?";
-  }
-
-  if (lowerMessage.includes("cum functioneaza") || lowerMessage.includes("cum funcționează")) {
-    return "Simplu: copiați un cod pe site (2 minute, ca un script de Google Analytics). În dashboard completați informațiile clinicii - prețuri, servicii, program. Chato învață și începe să răspundă. Când e ceva ce nu știe, vă trimite notificare pe WhatsApp.\n\nVreți să vă rezervați locul pe waitlist?";
-  }
-
-  if (lowerMessage.includes("waitlist") || lowerMessage.includes("inscri")) {
-    return "Super! Ca să vă rezerv locul pe waitlist, am nevoie de:\n- Numele clinicii\n- Email\n- Telefon\n\nVă contactăm când deschidem accesul. Clinicile de pe waitlist primesc 2 luni gratuite în loc de 14 zile! 🎉";
-  }
-
-  if (lowerMessage.includes("formular") || lowerMessage.includes("contact")) {
-    return "Formularul e ok, dar pacienții trebuie să aștepte răspunsul, nu? Chato răspunde instant, 24/7 - și noaptea, și în weekend. Câți pacienți vă contactează aproximativ pe lună?";
-  }
-
-  return "Înțeleg! Chato e un asistent AI care răspunde automat la întrebările pacienților pe site-ul clinicii, 24/7. Preia întrebările repetitive despre prețuri, program, servicii - exact ce consumă mult timp.\n\nCe vă interesează să aflați despre Chato?";
 }
