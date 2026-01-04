@@ -5,11 +5,14 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 export function FinalCTA() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
   const [formData, setFormData] = useState({
     clinicName: "",
     email: "",
@@ -19,12 +22,43 @@ export function FinalCTA() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch("/api/lead", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          clinic_name: formData.clinicName,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          conversation: [
+            {
+              role: "system",
+              content: "Lead from waitlist form",
+            },
+          ],
+        }),
+      });
 
-    setIsSubmitting(false);
-    setIsSuccess(true);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Eroare la trimitere");
+      }
+
+      setIsSuccess(true);
+    } catch (err) {
+      console.error("Form submission error:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "A apărut o eroare. Te rog încearcă din nou."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +126,9 @@ export function FinalCTA() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefon</Label>
+                    <Label htmlFor="phone">
+                      Telefon <span className="text-muted-foreground">(opțional)</span>
+                    </Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -100,14 +136,36 @@ export function FinalCTA() {
                       placeholder="0740 123 456"
                       value={formData.phone}
                       onChange={handleChange}
-                      required
                       className="h-12"
                     />
                   </div>
 
+                  <div className="flex items-start gap-3 mt-2">
+                    <Checkbox
+                      id="consent"
+                      checked={consent}
+                      onCheckedChange={(checked) =>
+                        setConsent(checked === true)
+                      }
+                      className="mt-0.5"
+                    />
+                    <label
+                      htmlFor="consent"
+                      className="text-sm text-muted-foreground font-normal leading-relaxed cursor-pointer"
+                    >
+                      Sunt de acord cu <a href="/politica-confidentialitate" target="_blank" className="text-primary hover:underline">Politica de Confidențialitate</a> și accept să fiu contactat în legătură cu serviciile Chato.
+                    </label>
+                  </div>
+
+                  {error && (
+                    <p className="text-sm text-destructive text-center">
+                      {error}
+                    </p>
+                  )}
+
                   <Button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !consent}
                     className="w-full btn-primary h-12 text-lg mt-6"
                   >
                     {isSubmitting ? (

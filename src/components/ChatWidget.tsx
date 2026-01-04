@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, X } from "lucide-react";
 import { useChat } from "./ChatContext";
@@ -36,6 +35,7 @@ export function ChatWidget() {
   const [showBubble, setShowBubble] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Show floating bubble after 1 second
   useEffect(() => {
@@ -45,7 +45,7 @@ export function ChatWidget() {
       }
     }, 1000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [isOpen]);
 
   // Hide bubble when chat opens
   useEffect(() => {
@@ -57,6 +57,21 @@ export function ChatWidget() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  // Auto-resize textarea
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      const lineHeight = 20; // approximate line height in pixels
+      const maxHeight = lineHeight * 4; // 4 lines max
+      textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [input]);
 
   // Submit lead to database
   const submitLead = async (leadData: LeadData, conversation: Message[]) => {
@@ -270,24 +285,30 @@ export function ChatWidget() {
 
             {/* Input */}
             <div className="p-4 border-t border-border shrink-0">
-              <div className="flex gap-2">
-                <Input
+              <div className="flex gap-2 items-end">
+                <textarea
+                  ref={textareaRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Scrie un mesaj..."
-                  className="flex-1"
+                  className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto"
                   disabled={isTyping}
+                  rows={1}
+                  style={{ maxHeight: "80px" }}
                 />
                 <Button
                   onClick={handleSend}
                   disabled={!input.trim() || isTyping}
                   size="icon"
-                  className="bg-primary hover:bg-primary/90"
+                  className="bg-primary hover:bg-primary/90 shrink-0"
                 >
                   <Send className="w-4 h-4" />
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Prin utilizarea chat-ului accepți <a href="/politica-confidentialitate" target="_blank" className="text-primary hover:underline">Politica de Confidențialitate</a>
+              </p>
             </div>
           </div>
         </>

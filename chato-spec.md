@@ -242,16 +242,16 @@ Single table for leads:
 
 ```sql
 CREATE TABLE leads (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  clinic_name TEXT,
-  city TEXT,
-  email TEXT,
-  phone TEXT,
-  has_website BOOLEAN,
-  patient_volume TEXT,
-  pain_point TEXT,
-  conversation JSONB,
-  created_at TIMESTAMP DEFAULT NOW()
+                       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                       clinic_name TEXT,
+                       city TEXT,
+                       email TEXT,
+                       phone TEXT,
+                       has_website BOOLEAN,
+                       patient_volume TEXT,
+                       pain_point TEXT,
+                       conversation JSONB,
+                       created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
@@ -344,34 +344,34 @@ Conversație:
 ## Landing Page Sections
 
 1. **Hero**
-   - Headline: "Asistentul AI care răspunde pacienților tăi 24/7"
-   - Subheadline: "Chato preia întrebările repetitive. Tu te ocupi de tratamente."
-   - CTA: "Înscrie-te pe waitlist" (scrolls to form or opens chat)
+    - Headline: "Asistentul AI care răspunde pacienților tăi 24/7"
+    - Subheadline: "Chato preia întrebările repetitive. Tu te ocupi de tratamente."
+    - CTA: "Înscrie-te pe waitlist" (scrolls to form or opens chat)
 
 2. **Problem**
-   - "Câte ore pierzi răspunzând la aceleași întrebări?"
-   - Common questions: prețuri, program, servicii
+    - "Câte ore pierzi răspunzând la aceleași întrebări?"
+    - Common questions: prețuri, program, servicii
 
 3. **Solution**
-   - Widget demo/screenshot
-   - Key benefits (24/7, nu obosește, răspunsuri consistente)
+    - Widget demo/screenshot
+    - Key benefits (24/7, nu obosește, răspunsuri consistente)
 
 4. **How it works**
-   - 1. Instalezi widget-ul (2 minute)
-   - 2. Încarci informațiile clinicii
-   - 3. Chato răspunde automat
+    - 1. Instalezi widget-ul (2 minute)
+    - 2. Încarci informațiile clinicii
+    - 3. Chato răspunde automat
 
 5. **Pricing preview**
-   - Plans (150/350/700 RON)
-   - "Primii 20 de clinici primesc 2 luni gratuite"
+    - Plans (150/350/700 RON)
+    - "Primii 20 de clinici primesc 2 luni gratuite"
 
 6. **Waitlist form** (fallback if chat not used)
-   - Numele clinicii
-   - Email
-   - Telefon
+    - Numele clinicii
+    - Email
+    - Telefon
 
 7. **Footer**
-   - Contact, legal stuff
+    - Contact, legal stuff
 
 ---
 
@@ -639,6 +639,245 @@ Chato: 😅 Da, alea cu butoane sunt preistorice. Chato înțelege întrebări n
 
 Vreți să vă arăt cum ar funcționa pentru clinica voastră? Pot să vă pun pe waitlist și vedeți voi când lansăm - 2 luni gratuite, fără obligație.
 ```
+
+---
+
+# GDPR Compliance
+
+## Overview
+
+Chato collects personal data (name, email, phone) from dental clinic visitors who want to join the waitlist or request contact. This requires GDPR compliance.
+
+## Data Flow
+
+```
+User (Romania/EU)
+    ↓
+Chat Widget (Vercel Edge - EU)
+    ↓
+Claude API (US - covered by SCCs)
+    ↓
+Response back to user
+    ↓
+Lead data saved to Vercel Postgres (EU - Frankfurt)
+```
+
+## Compliance Checklist
+
+| Requirement | Implementation |
+|-------------|----------------|
+| Legal basis | Consent (user voluntarily provides data) |
+| DPA with Anthropic | Sign in Anthropic Console |
+| DPA with Vercel | Included in Vercel terms |
+| Database location | Vercel Postgres EU region (fra1 - Frankfurt) |
+| Privacy policy | Page on chato.ro |
+| User consent | Notice in chat widget before first message |
+| Data minimization | Only collect name, email, phone, conversation |
+| Right to deletion | Implement /api/gdpr/delete endpoint |
+| Data retention | Delete leads after 12 months if not converted |
+
+## Vercel Postgres EU Setup
+
+When creating the database in Vercel:
+- Select region: **fra1 (Frankfurt)**
+- This ensures all lead data stays in EU
+
+## Consent Notice in Chat Widget
+
+Show this notice when chat opens, before user can type:
+
+```
+Prin utilizarea acestui chat, accepți [Politica de Confidențialitate]. 
+Datele tale vor fi folosite doar pentru a te contacta în legătură cu Chato.
+```
+
+Link "Politica de Confidențialitate" to /privacy page.
+
+## Privacy Policy Page (/privacy)
+
+Create a page at chato.ro/privacy with the following content:
+
+```markdown
+# Politica de Confidențialitate
+
+Ultima actualizare: [DATA]
+
+## Cine suntem
+
+Chato ("noi", "nostru") este un serviciu operat de [NUMELE TĂU / FIRMA TA], 
+cu sediul în România.
+
+Website: https://chato.ro
+Contact: contact@chato.ro
+
+## Ce date colectăm
+
+Când utilizezi chat-ul nostru sau te înscrii pe waitlist, colectăm:
+
+- Numele clinicii
+- Adresa de email
+- Numărul de telefon
+- Orașul
+- Conversația din chat
+
+## De ce colectăm aceste date
+
+Colectăm datele pentru a:
+- Răspunde la întrebările tale despre Chato
+- Te contacta când lansăm serviciul
+- Îmbunătăți serviciul nostru
+
+## Temeiul legal
+
+Prelucrăm datele tale pe baza consimțământului tău (Art. 6(1)(a) GDPR), 
+acordat când utilizezi chat-ul și ne furnizezi datele de contact.
+
+## Cine are acces la datele tale
+
+Datele tale sunt procesate de:
+
+1. **Chato** - pentru gestionarea waitlist-ului și comunicare
+2. **Anthropic (Claude AI)** - pentru procesarea conversațiilor din chat
+   - Sediu: SUA
+   - Transfer legal: Clauze Contractuale Standard (SCCs)
+   - Politica lor: https://www.anthropic.com/privacy
+3. **Vercel** - pentru stocarea datelor
+   - Datele sunt stocate în UE (Frankfurt)
+   - Politica lor: https://vercel.com/legal/privacy-policy
+
+## Cât timp păstrăm datele
+
+Păstrăm datele tale pentru:
+- Leads pe waitlist: 12 luni de la înscriere
+- Conversații: 30 de zile
+
+După această perioadă, datele sunt șterse automat.
+
+## Drepturile tale
+
+Conform GDPR, ai următoarele drepturi:
+
+- **Acces** - poți cere o copie a datelor tale
+- **Rectificare** - poți cere corectarea datelor incorecte
+- **Ștergere** - poți cere ștergerea datelor tale
+- **Portabilitate** - poți cere datele într-un format standard
+- **Retragerea consimțământului** - poți retrage consimțământul oricând
+
+Pentru a exercita aceste drepturi, contactează-ne la: contact@chato.ro
+
+Vom răspunde în maximum 30 de zile.
+
+## Plângeri
+
+Dacă consideri că datele tale nu sunt prelucrate corect, poți depune o plângere la:
+
+Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP)
+Website: https://www.dataprotection.ro
+Email: anspdcp@dataprotection.ro
+
+## Modificări ale politicii
+
+Vom actualiza această politică când este necesar. Data ultimei actualizări 
+este afișată la începutul paginii.
+
+## Contact
+
+Pentru întrebări despre confidențialitate:
+Email: contact@chato.ro
+```
+
+## GDPR Deletion Endpoint
+
+### POST /api/gdpr/delete
+
+Allows users to request deletion of their data.
+
+**Request:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Logic:**
+1. Find all leads with this email
+2. Delete from database
+3. Send confirmation email
+4. Log the deletion request (keep log for compliance, not the data)
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Datele au fost șterse."
+}
+```
+
+## Database Schema Update
+
+Add fields for GDPR compliance:
+
+```sql
+CREATE TABLE leads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  clinic_name TEXT,
+  city TEXT,
+  email TEXT,
+  phone TEXT,
+  has_website BOOLEAN,
+  patient_volume TEXT,
+  pain_point TEXT,
+  conversation JSONB,
+  
+  -- GDPR fields
+  consent_given_at TIMESTAMP DEFAULT NOW(),
+  consent_ip TEXT,
+  data_retention_until TIMESTAMP DEFAULT (NOW() + INTERVAL '12 months'),
+  
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Index for GDPR deletion requests
+CREATE INDEX idx_leads_email ON leads(email);
+
+-- Auto-delete old leads (run as cron job or Vercel cron)
+-- DELETE FROM leads WHERE data_retention_until < NOW();
+```
+
+## Telegram Notification Update
+
+When sending lead notifications to Telegram, remind yourself about GDPR:
+
+```
+🦷 Lead nou Chato!
+
+Clinică: DentPlus
+Oraș: Cluj
+Email: contact@dentplus.ro
+Telefon: 0740123456
+
+⚠️ Date GDPR - șterge după 12 luni dacă nu convertește
+```
+
+## Anthropic DPA
+
+1. Go to https://console.anthropic.com
+2. Navigate to Settings → Legal
+3. Sign the Data Processing Agreement
+4. Save confirmation for your records
+
+## Summary
+
+| Item | Status |
+|------|--------|
+| Database in EU | Use Vercel Postgres fra1 |
+| Anthropic DPA | Sign in console |
+| Privacy policy | Add /privacy page |
+| Consent notice | Show in chat widget |
+| Deletion endpoint | Implement /api/gdpr/delete |
+| Data retention | 12 months, then auto-delete |
+
+This setup is compliant with GDPR for a lead generation chatbot. You are NOT processing sensitive health data, just contact information for business communication.
 
 ---
 

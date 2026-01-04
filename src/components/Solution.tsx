@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Database, Bell, MessageCircle } from "lucide-react";
 
 const features = [

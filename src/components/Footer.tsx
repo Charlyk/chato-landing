@@ -27,9 +27,18 @@ export function Footer() {
 
         <Separator className="my-8" />
 
-        <p className="text-center text-small">
-          © {new Date().getFullYear()} Chato. Toate drepturile rezervate.
-        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-small">
+          <p>
+            © {new Date().getFullYear()} Chato. Toate drepturile rezervate.
+          </p>
+          <Separator orientation="vertical" className="h-4 hidden sm:block" />
+          <a
+            href="/politica-confidentialitate"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Politica de Confidențialitate
+          </a>
+        </div>
       </div>
     </footer>
   );
