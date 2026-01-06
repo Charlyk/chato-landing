@@ -58,6 +58,22 @@ export function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
+  // Handle mobile keyboard - scroll input into view
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const handleFocus = () => {
+      // On mobile, scroll the messages to bottom when keyboard opens
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    };
+
+    textarea.addEventListener("focus", handleFocus);
+    return () => textarea.removeEventListener("focus", handleFocus);
+  }, []);
+
   // Auto-resize textarea
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
@@ -204,7 +220,8 @@ export function ChatWidget() {
           {/* Chat panel */}
           <div
             className="fixed z-50 bg-background border border-border shadow-2xl flex flex-col
-              inset-0 sm:inset-auto
+              top-0 left-0 right-0 h-[100dvh]
+              sm:inset-auto sm:top-auto sm:left-auto
               sm:bottom-6 sm:right-6
               sm:w-[400px] sm:h-[600px] sm:max-h-[calc(100vh-100px)]
               sm:rounded-2xl overflow-hidden"
@@ -292,7 +309,7 @@ export function ChatWidget() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Scrie un mesaj..."
-                  className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto"
+                  className="flex-1 resize-none rounded-md border border-input bg-background px-3 py-2 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 overflow-y-auto"
                   disabled={isTyping}
                   rows={1}
                   style={{ maxHeight: "80px" }}

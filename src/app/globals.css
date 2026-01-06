@@ -249,6 +249,13 @@
     animation: pulse-coral 2s infinite;
   }
 
+  /* Mobile chat - prevent resize on keyboard open */
+  @supports (height: 100dvh) {
+    .chat-mobile-viewport {
+      height: 100dvh;
+    }
+  }
+
   /* User message bubble */
   .message-user {
     @apply bg-primary text-white rounded-2xl rounded-br-md px-4 py-2;
